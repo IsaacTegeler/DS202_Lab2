@@ -1,0 +1,11 @@
+---
+title: "Lab2 Team Report"
+author: "Isaac Tegeler, Nicholas Heger"
+date: "9/8/2020"
+output: html_document
+---
+
+```{r}
+choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv") 
+str(choco) 
+```
