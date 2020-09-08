@@ -1,0 +1,27 @@
+---
+title: "individual2"
+author: "Nicholas Heger"
+date: "9/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv") 
+str(choco) 
+```
+##### Searching for the Best Chocolates  
+1. How are the ratings distributed?
+```{r}
+hist(choco$Rating)
+boxplot(choco$Rating)
+```
+  
+The ratings are skewed left, with most ratings above the halfway mark of 2.5. We can see from the boxplot that the median is around 3.3 and there are roughly 4 outliers all around or below a rating of 2.  
+
+2. How does the number of ratings depend on year?
+```{r}
+barplot(table(choco$Date))
+```
+  
+The number of ratings per year is generally increasing until 2015, and it generally decreases after that, with a notably few ratings in 2017.
