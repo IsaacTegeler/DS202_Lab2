@@ -1,11 +1,47 @@
 ---
-title: "Lab2"
-author: "Isaac Tegeler"
+title: "Lab2 Individual Report"
+author: "Isaac Tegelerr"
 date: "9/8/2020"
 output: html_document
 ---
 
 ```{r}
 choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv") 
-str(choco) 
+str(choco)
 ```
+
+1. How are the ratings distributed? Create both a histogram and a boxplot and describe them. Don’t forget to mention outliers, if there are any.
+
+```{r}
+hist(choco$Rating, breaks=seq(1.00, 4.00, .25))
+boxplot(choco$Rating)
+```
+
+There does not seem to be any outliers for the distribution
+
+2. How does the number of ratings depend on the year? Draw a bar chart of the number of reports.
+
+To do this we will add a column of 1s to the front of the data frame and then aggregate the data by the year, summing up the 1s
+
+```{r}
+temp <- cbind(count = 1, choco)
+sums <- aggregate(x = temp$count, by=list(temp$Date), FUN=sum)
+barplot(sums$x, names.arg = sums$Group.1, main="Number of Ratings Per Year" )
+```
+3. Do ratings depend on the cacao percentage of a chocolate bar? Create both numerical and graphical summaries, and explain.
+
+```{r}
+means <- setNames(aggregate(x = choco$Cocoa_Percent, by = list(choco$Rating), FUN=mean), c("Rating", "Cocoa_Percentage"))
+means
+maxs <-  setNames(aggregate(x = choco$Cocoa_Percent, by = list(choco$Rating), FUN=max), c("Rating", "Cocoa_Percentage"))
+maxs
+mins <-  setNames(aggregate(x = choco$Cocoa_Percent, by = list(choco$Rating), FUN=min), c("Rating", "Cocoa_Percentage"))
+mins
+
+
+plot(maxs, bg=24, ylim=c(40,100), xlab="Rating", ylab="Cocoa Percentage")
+points(means, col="blue", pch=22, bg=24)
+points(mins,  col="red", bg=24)
+legend(1, 60, legend = c("Max", "Mean", "Min"), col=c("black", "blue", "red"), pch=c(1, 22, 1))
+```
+Generally speaking you can see that the lower rated chocolate bars have higher Cocoa Percentage
