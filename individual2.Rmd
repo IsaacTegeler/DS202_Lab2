@@ -7,8 +7,9 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv") 
-str(choco) 
+str(choco)
 ```
 ##### Searching for the Best Chocolates  
 1. How are the ratings distributed?
@@ -24,4 +25,31 @@ The ratings are skewed left, with most ratings above the halfway mark of 2.5. We
 barplot(table(choco$Date))
 ```
   
-The number of ratings per year is generally increasing until 2015, and it generally decreases after that, with a notably few ratings in 2017.
+The number of ratings per year is generally increasing until 2015, and it generally decreases after that, with a notably few ratings in 2017.  
+
+3. Ratings vs Cocoa Percent
+```{r}
+cor(choco$Cocoa_Percent, choco$Rating, method = c("pearson", "kendall", "spearman"))
+plot(choco$Cocoa_Percent, choco$Rating, main='Rating vs Cocoa Percent')
+```
+The correlation coefficient between the percent cocoa and rating is very low indicating that there is not much correlation between the two variables. Looking at a graph of these two variables it is clear that there is very little correlation and no trend to the graph.  
+
+4. Favorable and non-favorable characteristics
+```{r}
+ggplot(choco, aes(x = Characteristics1, y = Rating)) +
+  geom_col() + coord_flip()
+ordered <- choco[order(choco$Rating),]
+reversed <- choco[order(-choco$Rating),]
+extremes <- rbind(ordered[1:10,], reversed[1:10,])
+ggplot(extremes, aes(x = Characteristics1, y = Rating)) +
+  geom_bar(stat='summary') + coord_flip()
+print(unique(extremes[1:10,'Characteristics1']))
+print(unique(extremes[11:20,'Characteristics1']))
+ratingByCharacteristic1 <- choco %>%
+  group_by(Characteristics1) %>%
+  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  arrange(Rating)
+print(head(ratingByCharacteristic1['Characteristics1']))
+print(tail(ratingByCharacteristic1['Characteristics1']))
+```
+Above shows first a graph of the characteristics vs rating, however there are a ton of characteristics, so I made a smaller graph with just the top 10 and bottom 10 rated chocolates and their corresponding charactersitics. I also listed out the characteristics in the bottom 10, followed by those in the top 10 according to the graph. Next I averaged the ratings of each characteristic and put that in a new dataframe. I've printed the bottom and top few characteristics according to the averages, respectively.
