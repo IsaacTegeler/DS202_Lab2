@@ -53,3 +53,22 @@ print(head(ratingByCharacteristic1['Characteristics1']))
 print(tail(ratingByCharacteristic1['Characteristics1']))
 ```
 Above shows first a graph of the characteristics vs rating, however there are a ton of characteristics, so I made a smaller graph with just the top 10 and bottom 10 rated chocolates and their corresponding charactersitics. I also listed out the characteristics in the bottom 10, followed by those in the top 10 according to the graph. Next I averaged the ratings of each characteristic and put that in a new dataframe. I've printed the bottom and top few characteristics according to the averages, respectively.
+
+5. 2 Analyses  
+For our two analyses we plan to look at what companies make the best chocolate and what ingredients make the worst chocolate.
+```{r}
+ratingByCompany <- choco %>%
+  group_by(Company) %>%
+  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  arrange(-Rating)
+plot(factor(ratingByCompany$Company), ratingByCompany$Rating, main="Ratings vs Companies", las=3)
+print(ratingByCompany)
+ratingByIngredients <- choco %>%
+  group_by(Ingredients) %>%
+  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  arrange(Rating)
+plot(factor(ratingByIngredients$Ingredients), ratingByIngredients$Rating, main="Ratings vs Ingredients", las=3)
+print(ratingByIngredients)
+```
+To look at which companies make the best chocolate, we can average the ratings each company received and look at which companies scored the highest. A plot of this isn't particularly helpful since there are so many companies, and a graph of only some companies is no different than just displaying some of the top and bottom values, so a list of the top few companies by average rating, along with their average rating is shown above. We can see that the top company is Tobago Estate (Pralus).  
+Looking at the worst ingredient combinations was a similar experience. The plot was more helpful since there aren't as many ingredient combinations as there are companies. According to the plot and the list of the bottom few (above) we can see that the worst ingredient combination is B, S*, Sa, which corresponds to beans, sugar (that is sweeter than other white cane or beet sugar), and salt.

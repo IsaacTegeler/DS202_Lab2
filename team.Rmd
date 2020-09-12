@@ -1,11 +1,74 @@
 ---
-title: "Lab2 Team Report"
+title: "Lab 2 Team Report"
 author: "Isaac Tegeler, Nicholas Heger"
-date: "9/8/2020"
+date: "9/12/2020"
 output: html_document
 ---
 
-```{r}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv") 
-str(choco) 
+str(choco)
 ```
+##### Searching for the Best Chocolates  
+1. How are the ratings distributed?
+```{r}
+hist(choco$Rating)
+boxplot(choco$Rating)
+```
+  
+The ratings are skewed left, with most ratings above the halfway mark of 2.5. We can see from the boxplot that the median is around 3.3 and there are roughly 4 outliers all around or below a rating of 2.  
+
+2. How does the number of ratings depend on year?
+```{r}
+barplot(table(choco$Date))
+```
+  
+The number of ratings per year is generally increasing until 2015, and it generally decreases after that, with a notably few ratings in 2017.  
+
+3. Ratings vs Cocoa Percent
+```{r}
+cor(choco$Cocoa_Percent, choco$Rating, method = c("pearson", "kendall", "spearman"))
+plot(choco$Cocoa_Percent, choco$Rating, main='Rating vs Cocoa Percent')
+```
+The correlation coefficient between the percent cocoa and rating is very low indicating that there is not much correlation between the two variables. Looking at a graph of these two variables it is clear that there is very little correlation and no trend to the graph.  
+
+4. Favorable and non-favorable characteristics
+```{r}
+ggplot(choco, aes(x = Characteristics1, y = Rating)) +
+  geom_col() + coord_flip()
+ordered <- choco[order(choco$Rating),]
+reversed <- choco[order(-choco$Rating),]
+extremes <- rbind(ordered[1:10,], reversed[1:10,])
+ggplot(extremes, aes(x = Characteristics1, y = Rating)) +
+  geom_bar(stat='summary') + coord_flip()
+print(unique(extremes[1:10,'Characteristics1']))
+print(unique(extremes[11:20,'Characteristics1']))
+ratingByCharacteristic1 <- choco %>%
+  group_by(Characteristics1) %>%
+  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  arrange(Rating)
+print(head(ratingByCharacteristic1['Characteristics1']))
+print(tail(ratingByCharacteristic1['Characteristics1']))
+```
+Above shows first a graph of the characteristics vs rating, however there are a ton of characteristics, so I made a smaller graph with just the top 10 and bottom 10 rated chocolates and their corresponding charactersitics. I also listed out the characteristics in the bottom 10, followed by those in the top 10 according to the graph. Next I averaged the ratings of each characteristic and put that in a new dataframe. I've printed the bottom and top few characteristics according to the averages, respectively.
+
+5. 2 Analyses  
+For our two analyses we plan to look at what companies make the best chocolate and what ingredients make the worst chocolate.
+```{r}
+ratingByCompany <- choco %>%
+  group_by(Company) %>%
+  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  arrange(-Rating)
+plot(factor(ratingByCompany$Company), ratingByCompany$Rating, main="Ratings vs Companies", las=3)
+print(ratingByCompany)
+ratingByIngredients <- choco %>%
+  group_by(Ingredients) %>%
+  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  arrange(Rating)
+plot(factor(ratingByIngredients$Ingredients), ratingByIngredients$Rating, main="Ratings vs Ingredients", las=3)
+print(ratingByIngredients)
+```
+To look at which companies make the best chocolate, we can average the ratings each company received and look at which companies scored the highest. A plot of this isn't particularly helpful since there are so many companies, and a graph of only some companies is no different than just displaying some of the top and bottom values, so a list of the top few companies by average rating, along with their average rating is shown above. We can see that the top company is Tobago Estate (Pralus).  
+Looking at the worst ingredient combinations was a similar experience. The plot was more helpful since there aren't as many ingredient combinations as there are companies. According to the plot and the list of the bottom few (above) we can see that the worst ingredient combination is B, S*, Sa, which corresponds to beans, sugar (that is sweeter than other white cane or beet sugar), and salt.
