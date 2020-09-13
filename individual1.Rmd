@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r}
+library(ggplot2)
 choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv") 
 str(choco)
 ```
@@ -24,8 +25,8 @@ There does not seem to be any outliers for the distribution
 To do this we will add a column of 1s to the front of the data frame and then aggregate the data by the year, summing up the 1s
 
 ```{r}
-temp <- cbind(count = 1, choco)
-sums <- aggregate(x = temp$count, by=list(temp$Date), FUN=sum)
+choco <- cbind(count = 1, choco)
+sums <- aggregate(x = choco$count, by=list(choco$Date), FUN=sum)
 barplot(sums$x, names.arg = sums$Group.1, main="Number of Ratings Per Year" )
 ```
 3. Do ratings depend on the cacao percentage of a chocolate bar? Create both numerical and graphical summaries, and explain.
@@ -43,5 +44,51 @@ plot(maxs, bg=24, ylim=c(40,100), xlab="Rating", ylab="Cocoa Percentage")
 points(means, col="blue", pch=22, bg=24)
 points(mins,  col="red", bg=24)
 legend(1, 60, legend = c("Max", "Mean", "Min"), col=c("black", "blue", "red"), pch=c(1, 22, 1))
+
+
+cor(means$Rating, means$Cocoa_Percentage, method = c("pearson"))
 ```
-Generally speaking you can see that the lower rated chocolate bars have higher Cocoa Percentage
+Generally speaking you can see that the lower rated chocolate bars have higher Cocoa Percentage. The somewhat negative correlation shows that as you increase in rating the cocoa percentage will decrase.
+
+
+4. How do different characteristics of the chocolate compare? To elaborate, which characteristics tend to be more favorable and which ones are not? Create both numerical and graphical summaries, and explain.
+
+
+```{r}
+
+ch1_mean <- aggregate(x = choco$Rating, by = list(choco$Characteristics1), FUN=mean)
+ch2_mean <- aggregate(x = choco$Rating, by = list(choco$Characteristics2), FUN=mean)
+ch3_mean <- aggregate(x = choco$Rating, by = list(choco$Characteristics3), FUN=mean)
+ch4_mean <- aggregate(x = choco$Rating, by = list(choco$Characteristics4), FUN=mean)
+
+ch1_ordered_mean <- ch1_mean[order(ch1_mean$x),]
+ch2_ordered_mean <- ch2_mean[order(ch2_mean$x),]
+ch3_ordered_mean <- ch3_mean[order(ch3_mean$x),]
+ch4_ordered_mean <- ch4_mean[order(ch4_mean$x),]
+
+ordered_means <- list(ch1_ordered_mean, ch2_ordered_mean, ch3_ordered_mean, ch4_ordered_mean)
+col_names <- list("Characteristic 1", "Characteristic 2", "Characteristic 3", "Characteristic 4")
+
+
+cnt <- 1
+for (ordered_mean in ordered_means)
+{
+  top5 <- tail(ordered_mean, 5)
+  bottom5 <- head(ordered_mean, 5)
+  
+  top_and_bottom <- rbind(bottom5, top5)
+  top_and_bottom <- setNames(top_and_bottom, c(col_names[cnt], "Average Rating"))
+  
+  top_and_bottom[,1]<- factor(top_and_bottom[,1], levels = top_and_bottom[,1])
+
+  
+  p<-ggplot(data=top_and_bottom, aes(x=top_and_bottom[,1], y=top_and_bottom[,2])) + geom_bar(stat="identity", width= 0.25) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab(col_names[cnt]) + ylab("Average Rating")
+
+  print(p)
+  
+  cnt <- cnt + 1
+
+}
+
+```
+The characteristics the indicate that it is a good chocolate are typically a fruity flavor, and a good texture. The main outliers here would be the "hint of fruit" and the "lemon" flavors that do not score very high. 
