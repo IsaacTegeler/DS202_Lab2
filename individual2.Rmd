@@ -1,7 +1,7 @@
 ---
-title: "Lab 2 Team Report"
-author: "Isaac Tegeler, Nicholas Heger"
-date: "9/12/2020"
+title: "individual2"
+author: "Nicholas Heger"
+date: "9/8/2020"
 output: html_document
 ---
 
