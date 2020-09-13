@@ -82,7 +82,7 @@ for (ordered_mean in ordered_means)
   top_and_bottom[,1]<- factor(top_and_bottom[,1], levels = top_and_bottom[,1])
 
   
-  p<-ggplot(data=top_and_bottom, aes(x=top_and_bottom[,1], y=top_and_bottom[,2])) + geom_bar(stat="identity", width= 0.25) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab(col_names[cnt]) + ylab("Average Rating")
+  p<-ggplot(data=top_and_bottom, aes(y=top_and_bottom[,1], x=top_and_bottom[,2])) + geom_bar(stat="identity", width= 0.25)  + ylab(col_names[cnt]) + xlab("Average Rating")
 
   print(p)
   
@@ -91,4 +91,13 @@ for (ordered_mean in ordered_means)
 }
 
 ```
-The characteristics the indicate that it is a good chocolate are typically a fruity flavor, and a good texture. The main outliers here would be the "hint of fruit" and the "lemon" flavors that do not score very high. 
+
+The characteristics which indicate that it is a good chocolate are typically a fruity flavor, and a good texture. The main outliers here would be the "hint of fruit" and the "lemon" flavors that do not score very high. You can see that the average ratings for these types of flavors is high. However chemical, very bitter, and off flavors result in low ratings.
+
+
+
+5. 2 Analyses
+For our two analyses we plan to look at what companies make the best chocolate and what ingredients make the worst chocolate.
+
+See Team.Rmd for this part.
+

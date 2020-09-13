@@ -14,7 +14,7 @@ str(choco)
 ##### Searching for the Best Chocolates  
 1. How are the ratings distributed?
 ```{r}
-hist(choco$Rating)
+hist(choco$Rating, breaks=seq(1.00, 4.00, .25))
 boxplot(choco$Rating)
 ```
   
@@ -29,46 +29,74 @@ The number of ratings per year is generally increasing until 2015, and it genera
 
 3. Ratings vs Cocoa Percent
 ```{r}
-cor(choco$Cocoa_Percent, choco$Rating, method = c("pearson", "kendall", "spearman"))
+cor(choco$Cocoa_Percent, choco$Rating, method = c("pearson"))
 plot(choco$Cocoa_Percent, choco$Rating, main='Rating vs Cocoa Percent')
 ```
+
+
 The correlation coefficient between the percent cocoa and rating is very low indicating that there is not much correlation between the two variables. Looking at a graph of these two variables it is clear that there is very little correlation and no trend to the graph.  
 
 4. Favorable and non-favorable characteristics
 ```{r}
-ggplot(choco, aes(x = Characteristics1, y = Rating)) +
-  geom_col() + coord_flip()
-ordered <- choco[order(choco$Rating),]
-reversed <- choco[order(-choco$Rating),]
-extremes <- rbind(ordered[1:10,], reversed[1:10,])
-ggplot(extremes, aes(x = Characteristics1, y = Rating)) +
-  geom_bar(stat='summary') + coord_flip()
-print(unique(extremes[1:10,'Characteristics1']))
-print(unique(extremes[11:20,'Characteristics1']))
-ratingByCharacteristic1 <- choco %>%
-  group_by(Characteristics1) %>%
-  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
-  arrange(Rating)
-print(head(ratingByCharacteristic1['Characteristics1']))
-print(tail(ratingByCharacteristic1['Characteristics1']))
+#Get the average rating of a characteristic
+
+ch1_mean <- setNames(aggregate(x = choco$Rating, by = list(choco$Characteristics1), FUN=mean), c("Characteristic 1", "Average Rating"))
+ch1_ordered_mean <- ch1_mean[order(ch1_mean$`Average Rating`),]
+ch1_ordered_mean$`Characteristic 1` <- factor(ch1_ordered_mean$`Characteristic 1`, levels = ch1_ordered_mean$`Characteristic 1`)
+
+ggplot(ch1_ordered_mean, aes(x = `Characteristic 1`, y = `Average Rating`)) + geom_col() + coord_flip() + xlab("Charactersitic 1") + ylab("Average Rating")
+
 ```
-Above shows first a graph of the characteristics vs rating, however there are a ton of characteristics, so I made a smaller graph with just the top 10 and bottom 10 rated chocolates and their corresponding charactersitics. I also listed out the characteristics in the bottom 10, followed by those in the top 10 according to the graph. Next I averaged the ratings of each characteristic and put that in a new dataframe. I've printed the bottom and top few characteristics according to the averages, respectively.
+
+You can see that there are too many characteristics to get a good view of which ones are the best and which ones or the worst, so we split them and just look at the top and bottom 10 ratings.
+
+```{r}
+
+extremes <- rbind(head(ch1_ordered_mean, 10), tail(ch1_ordered_mean, 10))
+
+ggplot(extremes, aes(x = `Characteristic 1`, y = `Average Rating`)) + geom_col() + coord_flip() + xlab("Charactersitic 1") + ylab("Average Rating")
+
+#Best Rated Characteristics
+print(head(extremes, 10))
+
+#Worst Rated Characteristics"
+print(tail(extremes, 10))
+```
+We listed out the characteristics in the bottom 10, followed by those in the top 10 according to the graph. 
 
 5. 2 Analyses  
 For our two analyses we plan to look at what companies make the best chocolate and what ingredients make the worst chocolate.
 ```{r}
 ratingByCompany <- choco %>%
   group_by(Company) %>%
-  summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
+  summarise_at(vars(Rating), list(~mean(., na.rm=TRUE))) %>% 
   arrange(-Rating)
+
+
 plot(factor(ratingByCompany$Company), ratingByCompany$Rating, main="Ratings vs Companies", las=3)
 print(ratingByCompany)
+
+```
+
+
+To look at which companies make the best chocolate, we can average the ratings each company received and look at which companies scored the highest. A plot of this isn't particularly helpful since there are so many companies, and a graph of only some companies is no different than just displaying some of the top and bottom values, so a list of the top few companies by average rating, along with their average rating is shown above. 
+
+We can see that the top company is Tobago Estate (Pralus).  
+
+
+```{r}
 ratingByIngredients <- choco %>%
   group_by(Ingredients) %>%
   summarise_at(vars(Rating), funs(mean(., na.rm=TRUE))) %>% 
   arrange(Rating)
-plot(factor(ratingByIngredients$Ingredients), ratingByIngredients$Rating, main="Ratings vs Ingredients", las=3)
+
+
+plot(factor(ratingByIngredients$Ingredients), ratingByIngredients$Rating, main="Ratings vs Ingredients", las=3, ylim=c(2,4), ylab="Rating")
 print(ratingByIngredients)
 ```
-To look at which companies make the best chocolate, we can average the ratings each company received and look at which companies scored the highest. A plot of this isn't particularly helpful since there are so many companies, and a graph of only some companies is no different than just displaying some of the top and bottom values, so a list of the top few companies by average rating, along with their average rating is shown above. We can see that the top company is Tobago Estate (Pralus).  
-Looking at the worst ingredient combinations was a similar experience. The plot was more helpful since there aren't as many ingredient combinations as there are companies. According to the plot and the list of the bottom few (above) we can see that the worst ingredient combination is B, S*, Sa, which corresponds to beans, sugar (that is sweeter than other white cane or beet sugar), and salt.
+
+
+
+Looking at the worst ingredient combinations was a similar experience. The plot was more helpful since there aren't as many ingredient combinations as there are companies. According to the plot and the list of the bottom few (above) we can see that the worst ingredient combination is B, S*, Sa, which corresponds to beans, sugar (that is sweeter than other white cane or beet sugar), and salt. 
+
+
